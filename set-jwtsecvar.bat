@@ -1,0 +1,1 @@
+setx jwtsecvar "rawan" /M
