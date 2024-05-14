@@ -63,10 +63,9 @@ app.use("/api/package", packageRouter);
 
 //app.use(errorMW);
 
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 10000;
 
 
- 
 
 app.listen(port,()=>{
     console.log(`listening to ${port}..`)
