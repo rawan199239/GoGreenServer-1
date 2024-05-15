@@ -31,7 +31,7 @@ mongoose.connect("mongodb+srv://ahhossam68:c2RmScIUYX0H3gsw@cluster0.ihphmxf.mon
     console.log(err)
 });
 
-app.use(cors());
+
 //built in midlleware
 app.use(
     session({
@@ -45,7 +45,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(helmet());
-
+app.use(cors());
 
 //user middleware(APPLICATION-LEVEL MIDDLEWARE)
 //LOGIN
