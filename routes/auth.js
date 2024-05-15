@@ -5,6 +5,7 @@ const config = require("config");
 const User = require('../models/UserModel');
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+
 router.post("/", validator, async (req, res) => {
   try {
     console.log("Inside the try block");

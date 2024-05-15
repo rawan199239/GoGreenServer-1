@@ -5,10 +5,8 @@ const app = express();
 const mongoose=require("mongoose");
 const helmet= require("helmet");
 const session = require("express-session");
+const cors = require('cors');
 const axios = require("axios");
-
-
-
 const ejs= require("ejs");
 const logging=require("./middlewares/logging");
 const studentsRouter=require("./routes/Students");
@@ -33,6 +31,7 @@ mongoose.connect("mongodb+srv://ahhossam68:c2RmScIUYX0H3gsw@cluster0.ihphmxf.mon
     console.log(err)
 });
 
+app.use(cors());
 //built in midlleware
 app.use(
     session({
