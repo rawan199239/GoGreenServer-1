@@ -53,7 +53,7 @@ app.use(logging);
 
 
 app.use("/api/Students",studentsRouter);
-app.use("/api/Registration",userRouter);
+app.use("/api/",userRouter);
 app.use("/api/login",authRouter);
 app.use("/api/admin",adminRouter);
 app.use("/api/package", packageRouter);
