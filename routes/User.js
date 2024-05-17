@@ -8,7 +8,7 @@ const bcrypt=require("bcrypt");
 
 //const { User } = require("../models/UserModel");
 
-router.post("/", validator, async (req, res) => {
+router.post("/Registration", validator, async (req, res) => {
   try {
     //check already
     console.log(req.body);
@@ -29,18 +29,7 @@ router.post("/", validator, async (req, res) => {
       password: hashedPswd,
       phoneNumber:req.body.phoneNumber,
       address:req.body.address,
-      january:req.body.january,
-      february:req.body.february,
-      march:req.body.march,
-      april:req.body.april,
-      may:req.body.may,
-      june:req.body.june,
-      july:req.body.july,
-      august:req.body.august,
-      september:req.body.september,
-      october:req.body.october,
-      november:req.body.november,
-      december:req.body.december,
+     months: req.body.months,
       kind:req.body.kind
     });
     
@@ -53,6 +42,26 @@ router.post("/", validator, async (req, res) => {
   } catch (err) {
     console.log("Error occurred while creating user:", err);
     res.status(400).send("Bad Request: An error occurred while creating the user.");
+  }
+});
+router.get("/:userId/months", async (req, res) => {
+  try {
+    // Fetch the user by ID
+    const user = await User.findById(req.params.userId, "-_id name months kind").exec();
+
+    // Check if the user exists
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Reformat months data to include kind as the last item
+    const monthsData = { ...user.months, kind: user.kind };
+
+    // Send the reformatted months data
+    res.status(200).json(monthsData);
+  } catch (err) {
+    console.error("Error occurred while fetching months:", err);
+    res.status(500).send("Internal Server Error: Unable to fetch months.");
   }
 });
 module.exports=router;
