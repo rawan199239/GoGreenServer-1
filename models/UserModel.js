@@ -38,41 +38,43 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  january: {
-    type: Number,
-  },
-  february: {
-    type: Number,
-  },
-  march: {
-    type: Number,
-  },
-  april: {
-    type: Number,
-  },
-  may: {
-    type: Number,
-  },
-  june: {
-    type: Number,
-  },
-  july: {
-    type: Number,
-  },
-  august: {
-    type: Number,
-  },
-  september: {
-    type: Number,
-  },
-  october: {
-    type: Number,
-  },
-  november: {
-    type: Number,
-  },
-  december: {
-    type: Number,
+ months: {
+    january: {
+      type: Number,
+    },
+    february: {
+      type: Number,
+    },
+    march: {
+      type: Number,
+    },
+    april: {
+      type: Number,
+    },
+    may: {
+      type: Number,
+    },
+    june: {
+      type: Number,
+    },
+    july: {
+      type: Number,
+    },
+    august: {
+      type: Number,
+    },
+    september: {
+      type: Number,
+    },
+    october: {
+      type: Number,
+    },
+    november: {
+      type: Number,
+    },
+    december: {
+      type: Number,
+    }
   },
   kind: {
     type: Number,
