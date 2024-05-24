@@ -50,7 +50,7 @@ router.post("/", validator, async (req, res) => {
     };
 
     // Respond with success message, modified user object, and token
-    return res.status(200).send({
+    return res.status(201).send({
       message: "success",
       user: modifiedUser,
       token: token
