@@ -38,6 +38,7 @@ router.post("/", validator, async (req, res) => {
 
     // Prepare the modified user object to send in the response
     const modifiedUser = {
+      message: "success",
       _id: user._id,
       email: user.email,
       name: user.name,
