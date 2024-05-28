@@ -2,11 +2,9 @@ const express=require("express");
 const router=express.Router();
 const User=require("../models/UserModel");
 const config = require("config");
-/*console.log("User model:", User);*/
 const validator=require("../middlewares/UserMWValidator");
 const bcrypt=require("bcrypt");
-
-//const { User } = require("../models/UserModel");
+const axios = require("axios");
 
 router.post("/Registration", validator, async (req, res) => {
   try {
@@ -23,25 +21,56 @@ router.post("/Registration", validator, async (req, res) => {
     //create new user to be added to DB
     let salt = await bcrypt.genSalt(10);
     let hashedPswd = await bcrypt.hash(req.body.password, salt);
-    user = new User({
+  const newUser = new User({
       email: req.body.email,
       name: req.body.name,
       password: hashedPswd,
-      phoneNumber:req.body.phoneNumber,
-      address:req.body.address,
-     months: req.body.months,
-      kind:req.body.kind
+      phoneNumber: req.body.phoneNumber,
+      address: req.body.address,
+      months: req.body.months,
+      kind: req.body.kind,
+      packages: req.body.packages || []
     });
-    
-    await user.save();
+
+    // Save the new user using Mongoose's save() method
+    const createdUser = await newUser.save();
+
     if(!config.get("jwtsec")) return res.status(500).send("token is not defined");
-    const token =user.genAuthToken();
+    const token =createdUser.genAuthToken();
     res.setHeader("x-auth-token", token);
+
     //send res
-    res.status(201).send(user);
+    res.status(201).send(createdUser);
   } catch (err) {
     console.log("Error occurred while creating user:", err);
     res.status(400).send("Bad Request: An error occurred while creating the user.");
+  }
+});
+router.post("/:userId/savePackageDataFromAI", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    const user = await User.findById(userId, "-_id name months kind").exec();
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const monthsData = { ...user.months, kind: user.kind };
+
+    const apiUrl = "https://packages-api-6.onrender.com/predict";
+    const response = await axios.post(apiUrl, monthsData);
+
+    const packageData = response.data;
+
+    // Assuming packageData is a single number returned from the AI model
+    // Use findByIdAndUpdate to update the user's packages
+    await User.findByIdAndUpdate(userId, { packages: packageData }, { new: true }).exec();
+
+    res.status(200).json({ message: "Package data saved successfully", packages: packageData });
+  } catch (error) {
+    console.error("Error saving package data:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 router.get("/:userId/months", async (req, res) => {
