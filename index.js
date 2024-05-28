@@ -18,7 +18,7 @@ const packageRouter = require('./routes/Package');
 
 
 //2) set connection
-mongoose.connect("mongodb+srv://ahhossam68:c2RmScIUYX0H3gsw@cluster0.ihphmxf.mongodb.net/iti",{
+mongoose.connect("mongodb+srv://ahhossam68:c2RmScIUYX0H3gsw@cluster0.ihphmxf.mongodb.net/GoGreen",{
     useNewUrlParser:true,
     useUnifiedTopology:true,
     useCreateIndex:true,
