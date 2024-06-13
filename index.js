@@ -9,11 +9,10 @@ const cors = require('cors');
 const axios = require("axios");
 const ejs= require("ejs");
 const logging=require("./middlewares/logging");
-const studentsRouter=require("./routes/Students");
 const userRouter=require("./routes/User");
 const authRouter=require("./routes/auth");
 const adminRouter=require("./routes/admin");
-const packageRouter = require('./routes/Package');
+
 
 
 
@@ -52,11 +51,9 @@ app.use(cors({ origin : '*'}))
 app.use(logging);
 
 
-app.use("/api/Students",studentsRouter);
 app.use("/api/",userRouter);
 app.use("/api/login",authRouter);
 app.use("/api/admin",adminRouter);
-app.use("/api/package", packageRouter);
 
 
 //app.use(errorMW);
