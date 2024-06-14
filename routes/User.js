@@ -46,6 +46,93 @@ router.post("/Registration", validator, async (req, res) => {
     res.status(400).send("Bad Request: An error occurred while creating the user.");
   }
 });
+router.post("/:userId/saveHourlyConsumption", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { hour, consumption } = req.body;
+
+    if (!hour || typeof consumption !== "number") {
+      return res.status(400).send({ message: "Invalid data format" });
+    }
+
+    const user = await User.findById(userId).exec();
+
+    if (!user) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    user.consumption.hourlyConsumption.push({ hour, consumption });
+
+    const currentDay = new Date().toLocaleDateString("en-US", {
+      weekday: "short",
+    });
+    const dayTotal = user.consumption.hourlyConsumption.reduce(
+      (total, record) => total + record.consumption,
+      0
+    );
+    user.consumption.dailyConsumption = user.consumption.dailyConsumption.filter(
+      (record) => record.day !== currentDay
+    );
+    user.consumption.dailyConsumption.push({
+      day: currentDay,
+      consumption: dayTotal,
+    });
+
+    if (user.consumption.hourlyConsumption.length >= 24) {
+      user.consumption.hourlyConsumption = [];
+    }
+
+    if (user.consumption.dailyConsumption.length === 7) {
+      const weekTotal = user.consumption.dailyConsumption.reduce(
+        (total, record) => total + record.consumption,
+        0
+      );
+      user.consumption.weeklyConsumption.push({
+        week: `Week ${user.consumption.weeklyConsumption.length + 1}`,
+        consumption: weekTotal,
+      });
+      user.consumption.dailyConsumption = [];
+    }
+
+    const currentMonth = new Date().toLocaleString("en-US", { month: "short" });
+    if (user.consumption.weeklyConsumption.length === 4) {
+      const monthTotal = user.consumption.weeklyConsumption.reduce(
+        (total, record) => total + record.consumption,
+        0
+      );
+      user.consumption.monthlyConsumption = user.consumption.monthlyConsumption.filter(
+        (record) => record.month !== currentMonth
+      );
+      user.consumption.monthlyConsumption.push({
+        month: currentMonth,
+        consumption: monthTotal,
+      });
+      user.consumption.weeklyConsumption = [];
+    }
+
+    const currentYear = new Date().getFullYear();
+    if (user.consumption.monthlyConsumption.length === 12) {
+      const yearTotal = user.consumption.monthlyConsumption.reduce(
+        (total, record) => total + record.consumption,
+        0
+      );
+      user.consumption.yearlyConsumption.push({
+        year: currentYear,
+        consumption: yearTotal,
+      });
+      user.consumption.monthlyConsumption = [];
+    }
+
+    await user.save();
+
+    res
+      .status(200)
+      .send({ message: "Hourly consumption data saved and aggregated successfully" });
+  } catch (error) {
+    console.error("Error storing hourly consumption data:", error.message);
+    res.status(500).send("Internal Server Error: Failed to store hourly consumption data.");
+  }
+});
 router.post("/:userId/savePackageDataFromAI", async (req, res) => {
   try {
     const userId = req.params.userId;
