@@ -25,7 +25,7 @@ router.post("/login", async (req, res) => {
     }
 
     // Generate JWT token for admin
-    const token = jwt.sign({ userId: admin._id, email: admin.email }, config.get("jwtSecret"), {
+    const token = jwt.sign({ userId: admin._id, email: admin.email }, config.get("jwtsec"), {
       expiresIn: "1h" // Token expiration time
     });
 
@@ -44,7 +44,7 @@ const verifyAdminToken = (req, res, next) => {
   }
 
   try {
-    const decoded = jwt.verify(token, config.get("jwtSecret"));
+    const decoded = jwt.verify(token, config.get("jwtsec"));
     req.user = decoded;
     next();
   } catch (error) {
