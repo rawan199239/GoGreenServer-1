@@ -74,6 +74,37 @@ const userSchema = new mongoose.Schema({
     december: {
       type: Number,
     }
+  },consumption: {
+    hourlyConsumption: [
+      {
+        hour: { type: String, required: true },
+        consumption: { type: Number, required: true },
+      },
+    ],
+    dailyConsumption: [
+      {
+        day: { type: String, required: true },
+        consumption: { type: Number, required: true },
+      },
+    ],
+    weeklyConsumption: [
+      {
+        week: { type: String, required: true },
+        consumption: { type: Number, required: true },
+      },
+    ],
+    monthlyConsumption: [
+      {
+        month: { type: String, required: true },
+        consumption: { type: Number, required: true },
+      },
+    ],
+    yearlyConsumption: [
+      {
+        year: { type: Number, required: true },
+        consumption: { type: Number, required: true },
+      },
+    ],
   },
   kind: {
     type: Number,
