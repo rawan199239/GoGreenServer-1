@@ -44,13 +44,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(helmet());
-app.use(cors({
-  origin: 'https://gogreenserver-1-1.onrender.com', // Replace with your frontend URL
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-  optionsSuccessStatus: 204
-}));
+app.use(cors({ origin : '*'}))
 
 
 //user middleware(APPLICATION-LEVEL MIDDLEWARE)
