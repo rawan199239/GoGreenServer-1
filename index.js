@@ -52,8 +52,6 @@ app.use(cors({
   optionsSuccessStatus: 204
 }));
 
-// Handle preflight requests
-app.options('*', cors());
 
 //user middleware(APPLICATION-LEVEL MIDDLEWARE)
 //LOGIN
