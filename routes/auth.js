@@ -43,6 +43,7 @@ router.post("/", validator, async (req, res) => {
       email: user.email,
       name: user.name,
       phoneNumber: user.phoneNumber,
+      isAdmin: user.isAdmin,
       address: user.address,
       kind: user.kind,
       // Include the updated consumption data
