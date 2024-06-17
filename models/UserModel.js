@@ -87,10 +87,19 @@ const userSchema = new mongoose.Schema({
     default: []
   }
 });
-userSchema.methods.genAuthToken=function(){
-  const token = jwt.sign({usrid:this._id},config.get("jwtsec"));
-    return token;
+userSchema.methods.genAuthToken = function () {
+  const token = jwt.sign(
+    {
+      usrid: this._id,
+      isAdmin: this.isAdmin
+    },
+    config.get("jwtsec")
+    // ,{ expiresIn: '1h' } 
+    // Optional: set token expiration time
+  );
+  return token;
 };
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = User;
