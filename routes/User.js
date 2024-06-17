@@ -149,7 +149,7 @@ router.post("/:userId/savePackageDataFromAI", async (req, res) => {
     const apiUrl = "https://packages-api-6.onrender.com/predict";
     const response = await axios.post(apiUrl, monthsData);
 
-    const packageData = response.data;
+    const packageData = response.data.packages.prediction;
 
     // Assuming packageData is a single number returned from the AI model
     // Use findByIdAndUpdate to update the user's packages
