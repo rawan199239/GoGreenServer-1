@@ -109,14 +109,9 @@ const userSchema = new mongoose.Schema({
   kind: {
     type: Number,
   },
-  packages: {
-    type: [{
-      prediction: {
-        type: Number
-      }
-    }],
-    default: []
-  }
+ packages: {
+    prediction: { type: Number, default: 0 } // Define packages as an object with a single field
+ }
 });
 userSchema.methods.genAuthToken = function () {
   const token = jwt.sign(
