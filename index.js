@@ -46,6 +46,7 @@ app.use(cookieParser());
 app.use(helmet());
 app.use(cors({ origin : '*'}))
 
+
 //user middleware(APPLICATION-LEVEL MIDDLEWARE)
 //LOGIN
 app.use(logging);
