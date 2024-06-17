@@ -6,13 +6,10 @@ const schema={
     "properties":{
 
         "email":{
-            "type":"string",
-            "pattern":".+\@.+\..+"
+            "type":"string"
         },
         "password":{
-            "type":"string",
-            "minLength":5,
-            "maxLength":1024
+            "type":"string"
         }
 
     },
