@@ -133,6 +133,29 @@ router.post("/:userId/saveHourlyConsumption", async (req, res) => {
     res.status(500).send("Internal Server Error: Failed to store hourly consumption data.");
   }
 });
+router.get("/:userId/consumption", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId).exec();
+
+    if (!user) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Extract consumption data from the user object
+    const consumptionData = {
+      day: user.consumption.hourlyConsumption.map(({ hour, consumption }) => ({ hour, consumption })),
+      week: user.consumption.dailyConsumption.map(({ day, consumption }) => ({ day, consumption })),
+      month: user.consumption.monthlyConsumption.map(({ month, consumption }) => ({ month, consumption })),
+      year: user.consumption.yearlyConsumption.map(({ year, consumption }) => ({ year, consumption }))
+    };
+
+    res.status(200).json(consumptionData);
+  } catch (error) {
+    console.error("Error fetching consumption data:", error.message);
+    res.status(500).send("Internal Server Error: Failed to fetch consumption data.");
+  }
+});
 router.post("/:userId/savePackageDataFromAI", async (req, res) => {
   try {
     const userId = req.params.userId;
