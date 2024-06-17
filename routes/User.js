@@ -29,8 +29,7 @@ router.post("/Registration", validator, async (req, res) => {
       address: req.body.address,
       months: req.body.months,
       kind: req.body.kind,
-      isAdmin: req.body.isAdmin,
-      packages: req.body.packages || []
+      isAdmin: req.body.isAdmin
     });
 
     // Save the new user using Mongoose's save() method
