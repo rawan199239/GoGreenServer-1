@@ -46,6 +46,7 @@ router.post("/", validator, async (req, res) => {
       isAdmin: user.isAdmin,
       address: user.address,
       packages:user.packages,
+      predicted_consumption:user.predicted_consumption,
       kind: user.kind,
       // Include the updated consumption data
       months: months.map(month => ({ month: month, count: user[month] }))
