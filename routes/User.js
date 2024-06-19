@@ -183,6 +183,73 @@ router.post("/:userId/savePackageDataFromAI", async (req, res) => {
     res.status(500).json({ message: "Internal server error" });
   }
 });
+router.post("/:userId/savePredictedConsumption", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Get current date and time
+    const now = new Date();
+    const currentDateTime = now.toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    });
+
+    // Fetch current weather
+    const currentWeather = await getCurrentWeather();
+
+    // Prepare data for the API
+    const dataForModel = {
+      datetime: currentDateTime,
+      weather: `${currentWeather.temp} °C`,
+    };
+
+    // Send data to AI model for prediction
+    const apiUrl = "https://consumption-api-2.onrender.com/predict/";
+    const response = await axios.post(apiUrl, dataForModel);
+    const predictedConsumption = response.data.predicted_consumption;
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Store the predicted consumption in the database
+    user.predicted_consumption = { predictedConsumption };
+
+    // Save the user data
+    await user.save();
+
+    res.status(200).json({ message: "Predicted consumption saved successfully", predictedConsumption });
+  } catch (error) {
+    console.error("Error saving predicted consumption data:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Function to fetch current weather
+async function getCurrentWeather() {
+  try {
+    const apiKey = '338be39345079a73b61813ef35d63a4e'; // Replace with your actual API key
+    const city = 'Egypt'; // Replace with your city name
+
+    // Make a GET request to the OpenWeatherMap API
+    const response = await axios.get(`http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}`);
+
+    // Extract the temperature data from the response
+    const temperature = response.data.main.temp;
+
+    return { temp: temperature };
+  } catch (error) {
+    console.error('Error fetching current weather:', error.message);
+    throw new Error('Failed to fetch current weather');
+  }
+}
 router.get("/:userId/months", async (req, res) => {
   try {
     // Fetch the user by ID
