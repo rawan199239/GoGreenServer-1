@@ -115,8 +115,6 @@ const userSchema = new mongoose.Schema({
   ],
   kind: {
     type: Number,
-  },predicted_consumption: {
-    predictedConsumption: { type: Number, default: 0  } // Only save the predicted consumption value
   },
  packages: {
     prediction: { type: Number, default: 0 } // Define packages as an object with a single field
