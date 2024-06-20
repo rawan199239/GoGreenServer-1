@@ -106,6 +106,9 @@ const userSchema = new mongoose.Schema({
         consumption: { type: Number, required: true },
       },
     ],
+  },  battery_percentage: {
+    type: Number,
+    default: null
   },
   predicted_consumptions: [
     {
