@@ -7,6 +7,7 @@ const helmet= require("helmet");
 const session = require("express-session");
 const cors = require('cors');
 const axios = require("axios");
+const bodyParser = require('body-parser');
 const ejs= require("ejs");
 const logging=require("./middlewares/logging");
 const userRouter=require("./routes/User");
@@ -41,6 +42,7 @@ app.use(
     })
   );
 app.use(express.json());
+app.use(bodyParser.text());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(helmet());
