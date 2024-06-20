@@ -107,6 +107,12 @@ const userSchema = new mongoose.Schema({
       },
     ],
   },
+  predicted_consumptions: [
+    {
+      datetime: { type: Date, required: true },
+      predicted_consumption: { type: Number, required: true },
+    }
+  ],
   kind: {
     type: Number,
   },predicted_consumption: {
