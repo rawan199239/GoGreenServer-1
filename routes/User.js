@@ -245,7 +245,7 @@ router.post("/:userId/savePredictedConsumption", async (req, res) => {
 // Function to fetch current weather
 async function getCurrentWeather() {
   try {
-    const apiKey = '338be39345079a73b61813ef35d63a4e'; // Replace with your actual API key
+    const apiKey = '338be39345079a73b61813ef35d63a4e'; // 376efffe5042bb1423082cb8845e3df5  Replace with your actual API key
     const city = 'Egypt'; // Replace with your city name
 
     // Make a GET request to the OpenWeatherMap API
