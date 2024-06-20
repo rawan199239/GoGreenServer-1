@@ -49,85 +49,68 @@ router.post("/Registration", validator, async (req, res) => {
 router.post("/:userId/saveHourlyConsumption", async (req, res) => {
   try {
     const userId = req.params.userId;
-    const { hour, consumption } = req.body;
+    const consumption = parseFloat(req.body);
 
-    if (!hour || typeof consumption !== "number") {
+    // Validate the consumption value
+    if (isNaN(consumption)) {
       return res.status(400).send({ message: "Invalid data format" });
     }
 
+    // Find the user by ID
     const user = await User.findById(userId).exec();
 
+    // Check if the user exists
     if (!user) {
       return res.status(404).send({ message: "User not found" });
     }
 
-    user.consumption.hourlyConsumption.push({ hour, consumption });
+    // Get the current hour in 24-hour format
+    const now = new Date();
+    const currentHour = now.toISOString().split('T')[1].slice(0, 2); // Extracts "HH" from "YYYY-MM-DDTHH:mm:ss.sssZ"
 
-    const currentDay = new Date().toLocaleDateString("en-US", {
-      weekday: "short",
-    });
-    const dayTotal = user.consumption.hourlyConsumption.reduce(
-      (total, record) => total + record.consumption,
-      0
-    );
-    user.consumption.dailyConsumption = user.consumption.dailyConsumption.filter(
-      (record) => record.day !== currentDay
-    );
-    user.consumption.dailyConsumption.push({
-      day: currentDay,
-      consumption: dayTotal,
-    });
+    // Push the hourly consumption data
+    user.consumption.hourlyConsumption.push({ hour: currentHour, consumption });
 
+    // Aggregate daily consumption
+    const currentDay = now.toLocaleDateString("en-US", { weekday: "short" });
+    const dayTotal = user.consumption.hourlyConsumption.reduce((total, record) => total + record.consumption, 0);
+    user.consumption.dailyConsumption = user.consumption.dailyConsumption.filter(record => record.day !== currentDay);
+    user.consumption.dailyConsumption.push({ day: currentDay, consumption: dayTotal });
+
+    // Clear hourly data after 24 entries
     if (user.consumption.hourlyConsumption.length >= 24) {
       user.consumption.hourlyConsumption = [];
     }
 
+    // Aggregate weekly consumption
     if (user.consumption.dailyConsumption.length === 7) {
-      const weekTotal = user.consumption.dailyConsumption.reduce(
-        (total, record) => total + record.consumption,
-        0
-      );
-      user.consumption.weeklyConsumption.push({
-        week: `Week ${user.consumption.weeklyConsumption.length + 1}`,
-        consumption: weekTotal,
-      });
+      const weekTotal = user.consumption.dailyConsumption.reduce((total, record) => total + record.consumption, 0);
+      user.consumption.weeklyConsumption.push({ week: `Week ${user.consumption.weeklyConsumption.length + 1}`, consumption: weekTotal });
       user.consumption.dailyConsumption = [];
     }
 
-    const currentMonth = new Date().toLocaleString("en-US", { month: "short" });
+    // Aggregate monthly consumption
+    const currentMonth = now.toLocaleString("en-US", { month: "short" });
     if (user.consumption.weeklyConsumption.length === 4) {
-      const monthTotal = user.consumption.weeklyConsumption.reduce(
-        (total, record) => total + record.consumption,
-        0
-      );
-      user.consumption.monthlyConsumption = user.consumption.monthlyConsumption.filter(
-        (record) => record.month !== currentMonth
-      );
-      user.consumption.monthlyConsumption.push({
-        month: currentMonth,
-        consumption: monthTotal,
-      });
+      const monthTotal = user.consumption.weeklyConsumption.reduce((total, record) => total + record.consumption, 0);
+      user.consumption.monthlyConsumption = user.consumption.monthlyConsumption.filter(record => record.month !== currentMonth);
+      user.consumption.monthlyConsumption.push({ month: currentMonth, consumption: monthTotal });
       user.consumption.weeklyConsumption = [];
     }
 
-    const currentYear = new Date().getFullYear();
+    // Aggregate yearly consumption
+    const currentYear = now.getFullYear();
     if (user.consumption.monthlyConsumption.length === 12) {
-      const yearTotal = user.consumption.monthlyConsumption.reduce(
-        (total, record) => total + record.consumption,
-        0
-      );
-      user.consumption.yearlyConsumption.push({
-        year: currentYear,
-        consumption: yearTotal,
-      });
+      const yearTotal = user.consumption.monthlyConsumption.reduce((total, record) => total + record.consumption, 0);
+      user.consumption.yearlyConsumption.push({ year: currentYear, consumption: yearTotal });
       user.consumption.monthlyConsumption = [];
     }
 
+    // Save the updated user document
     await user.save();
 
-    res
-      .status(200)
-      .send({ message: "Hourly consumption data saved and aggregated successfully" });
+    // Send success response
+    res.status(200).send({ message: "Hourly consumption data saved and aggregated successfully" });
   } catch (error) {
     console.error("Error storing hourly consumption data:", error.message);
     res.status(500).send("Internal Server Error: Failed to store hourly consumption data.");
@@ -154,6 +137,53 @@ router.get("/:userId/consumption", async (req, res) => {
   } catch (error) {
     console.error("Error fetching consumption data:", error.message);
     res.status(500).send("Internal Server Error: Failed to fetch consumption data.");
+  }
+});
+router.post("/:userId/saveBatteryPercentage", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const battery_percentage = parseFloat(req.body);
+
+    // Validate the battery percentage
+    if (isNaN(battery_percentage) || battery_percentage < 0 || battery_percentage > 100) {
+      return res.status(400).json({ message: "Invalid battery percentage" });
+    }
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update the battery percentage
+    user.battery_percentage = battery_percentage;
+
+    // Save the user data
+    await user.save();
+
+    res.status(200).json({ message: "Battery percentage updated successfully", battery_percentage: user.battery_percentage });
+  } catch (error) {
+    console.error("Error saving battery percentage:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+router.get("/:userId/getBatteryPercentage", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Retrieve the battery percentage
+    const battery_percentage = user.battery_percentage;
+
+    res.status(200).json({ battery_percentage });
+  } catch (error) {
+    console.error("Error retrieving battery percentage:", error.message);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 router.post("/:userId/savePackageDataFromAI", async (req, res) => {
