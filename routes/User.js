@@ -189,15 +189,7 @@ router.post("/:userId/savePredictedConsumption", async (req, res) => {
 
     // Get current date and time
     const now = new Date();
-    const currentDateTime = now.toLocaleString("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    });
+    const currentDateTime = now.toISOString().replace('T', ' ').substring(0, 19); // Format: YYYY-MM-DD HH:MM:SS
 
     // Fetch current weather
     const currentWeather = await getCurrentWeather();
@@ -209,9 +201,15 @@ router.post("/:userId/savePredictedConsumption", async (req, res) => {
     };
 
     // Send data to AI model for prediction
-    const apiUrl = "https://consumption-api-2.onrender.com/predict/";
+    const apiUrl = "https://consumption-api-1.onrender.com/predict/";
     const response = await axios.post(apiUrl, dataForModel);
-    const predictedConsumption = response.data.predicted_consumption;
+
+    if (response.status !== 200) {
+      console.error(`Error saving predicted consumption data: ${response.statusText}`);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+
+    const responseData = response.data;
 
     // Find the user by ID
     const user = await User.findById(userId);
@@ -219,15 +217,27 @@ router.post("/:userId/savePredictedConsumption", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Store the predicted consumption in the database
-    user.predicted_consumption = { predictedConsumption };
+    // Prepare the new predicted consumption entries
+    const newPredictedConsumptions = responseData.map(item => ({
+      datetime: new Date(item.datetime),
+      predicted_consumption: item.predicted_consumption // Correct field name
+    }));
+
+    // Append the new predicted consumption entries to the existing array
+    user.predicted_consumptions.push(...newPredictedConsumptions); // Correct field name and syntax
 
     // Save the user data
     await user.save();
 
-    res.status(200).json({ message: "Predicted consumption saved successfully", predictedConsumption });
+    res.status(200).json({ message: "Predicted consumption saved successfully", predicted_consumptions: newPredictedConsumptions });
   } catch (error) {
-    console.error("Error saving predicted consumption data:", error.message);
+    if (error.response) {
+      console.error(`Error saving predicted consumption data: ${error.response.statusText}`);
+    } else if (error.request) {
+      console.error("Error saving predicted consumption data: No response received");
+    } else {
+      console.error("Error saving predicted consumption data:", error.message);
+    }
     res.status(500).json({ message: "Internal server error" });
   }
 });
@@ -250,6 +260,29 @@ async function getCurrentWeather() {
     throw new Error('Failed to fetch current weather');
   }
 }
+router.get("/:userId/getPredictedConsumptions", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Extract the predicted_consumptions array
+    const predictedConsumptions = user.predicted_consumptions.map(item => ({
+      datetime: item.datetime,
+      predicted_consumption: item.predicted_consumption
+    }));
+
+    res.status(200).json(predictedConsumptions);
+  } catch (error) {
+    console.error("Error fetching predicted consumption data:", error.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 router.get("/:userId/months", async (req, res) => {
   try {
     // Fetch the user by ID
